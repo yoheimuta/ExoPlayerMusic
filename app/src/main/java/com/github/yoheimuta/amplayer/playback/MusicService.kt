@@ -18,6 +18,7 @@ import android.graphics.Bitmap
 import com.github.yoheimuta.amplayer.extensions.flag
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.util.Log
 import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,18 +43,20 @@ class MusicService: MediaBrowserServiceCompat() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
     private val exoPlayer: ExoPlayer by lazy {
-        val uAmpAudioAttributes = AudioAttributes.Builder()
+        val audioAttributes = AudioAttributes.Builder()
             .setContentType(C.CONTENT_TYPE_MUSIC)
             .setUsage(C.USAGE_MEDIA)
             .build()
 
         ExoPlayerFactory.newSimpleInstance(this).apply {
-            setAudioAttributes(uAmpAudioAttributes, true)
+            setAudioAttributes(audioAttributes, true)
         }
     }
 
     override fun onCreate() {
         super.onCreate()
+
+        Log.i(TAG, "onCreate")
 
         musicSource = InMemorySource()
         serviceScope.launch {
@@ -116,6 +119,11 @@ class MusicService: MediaBrowserServiceCompat() {
 
     override fun onLoadChildren(parentId: String,
                                 result: Result<List<MediaItem>>) {
+        if (parentId != MEDIA_ROOT_ID) {
+            result.sendResult(null)
+            return
+        }
+
         val resultsSent = musicSource.whenReady { successfullyInitialized ->
             if (successfullyInitialized) {
                 val children = musicSource.toList().map { item ->
