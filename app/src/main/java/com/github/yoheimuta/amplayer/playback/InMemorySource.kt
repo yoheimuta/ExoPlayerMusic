@@ -1,6 +1,8 @@
 package com.github.yoheimuta.amplayer.playback
 
 import android.support.v4.media.MediaMetadataCompat
+import android.util.Log
+import com.github.yoheimuta.amplayer.extensions.id
 
 class InMemorySource() : AbstractMusicSource() {
 

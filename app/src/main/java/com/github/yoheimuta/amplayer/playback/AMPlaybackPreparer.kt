@@ -28,6 +28,8 @@ class AMPlaybackPreparer(
     override fun onPrepare(playWhenReady: Boolean) = Unit
 
     override fun onPrepareFromMediaId(mediaId: String?, playWhenReady: Boolean, extras: Bundle?) {
+        Log.i(TAG, "onPrepareFromMediaId: mediaID=$mediaId")
+
         musicSource.whenReady {
             val itemToPlay: MediaMetadataCompat? = musicSource.find { item ->
                 item.id == mediaId
@@ -40,6 +42,7 @@ class AMPlaybackPreparer(
 
                 val initialWindowIndex = metadataList.indexOf(itemToPlay)
 
+                exoPlayer.setPlayWhenReady(playWhenReady)
                 exoPlayer.prepare(mediaSource)
                 exoPlayer.seekTo(initialWindowIndex, 0)
             }

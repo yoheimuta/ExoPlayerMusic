@@ -47,6 +47,17 @@ class MainActivity : AppCompatActivity() {
     private inner class ConnectionCallback : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
             Log.i(TAG, "onConnected")
+
+            mediaBrowser.sessionToken.also { token ->
+                val mediaController = MediaControllerCompat(
+                    this@MainActivity, // Context
+                    token
+                )
+
+                MediaControllerCompat.setMediaController(this@MainActivity, mediaController)
+            }
+
+            mediaBrowser.subscribe(mediaBrowser.getRoot(), SubscriptionCallback());
         }
 
         override fun onConnectionSuspended() {
@@ -57,4 +68,15 @@ class MainActivity : AppCompatActivity() {
             Log.i(TAG, "The Service has refused our connection")
         }
     }
+
+    private inner class SubscriptionCallback: MediaBrowserCompat.SubscriptionCallback() {
+        override fun onChildrenLoaded(parentId: String, children: List<MediaBrowserCompat.MediaItem>) {
+            val mediaController = MediaControllerCompat.getMediaController(this@MainActivity)
+            if (children.isNotEmpty()) {
+                val first = children.get(0).getMediaId()
+                mediaController.getTransportControls().playFromMediaId(first, null)
+            }
+        }
+    }
 }
+

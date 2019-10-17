@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">AMPlayer</string>
+
+    <!-- Notificaiton Channel -->
+    <string name="notification_channel">Now Playing</string>
+    <string name="notification_channel_description">Shows what music is currently playing in AMPlayer</string>
 </resources>

@@ -15,6 +15,7 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
+import com.github.yoheimuta.amplayer.R
 import com.github.yoheimuta.amplayer.extensions.flag
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
@@ -88,9 +89,11 @@ class MusicService: MediaBrowserServiceCompat() {
             it.setQueueNavigator(AMQueueNavigator(mediaSession))
         }
 
-        playerNotificationManager = PlayerNotificationManager(
+        playerNotificationManager = PlayerNotificationManager.createWithNotificationChannel(
             this,
             CHANNEL_ID,
+            R.string.notification_channel,
+            R.string.notification_channel_description,
             NOTIFICATION_ID,
             MediaDescriptionAdapter(),
             NotificationListener()
