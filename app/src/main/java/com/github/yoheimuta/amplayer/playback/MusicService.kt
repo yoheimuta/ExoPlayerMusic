@@ -17,6 +17,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Binder
 import android.os.ResultReceiver
+import androidx.core.content.ContextCompat
 import com.github.yoheimuta.amplayer.R
 import com.github.yoheimuta.amplayer.extensions.flag
 import com.google.android.exoplayer2.*
@@ -190,6 +191,10 @@ class MusicService: MediaBrowserServiceCompat() {
         ) {
             when {
                 ongoing && !isForegroundService -> {
+                    ContextCompat.startForegroundService(
+                        applicationContext,
+                        Intent(applicationContext, this@MusicService.javaClass)
+                    )
                     startForeground(notificationId, notification)
                     isForegroundService = true
                 }
