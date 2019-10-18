@@ -15,6 +15,8 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Binder
+import android.os.ResultReceiver
 import com.github.yoheimuta.amplayer.R
 import com.github.yoheimuta.amplayer.extensions.flag
 import com.google.android.exoplayer2.*
@@ -33,6 +35,9 @@ private const val AMPLAYER_USER_AGENT = "amplayer.next"
 private const val NOTIFICATION_ID: Int = 0xb339
 private const val NETWORK_FAILURE = "com.github.yoheimuta.amplayer.playback.session.NETWORK_FAILURE"
 
+const val GET_PLAYER_COMMAND = "getPlayer"
+const val MUSIC_SERVICE_BINDER_KEY = "MusicServiceBinder"
+
 class MusicService: MediaBrowserServiceCompat() {
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaController: MediaControllerCompat
@@ -42,6 +47,7 @@ class MusicService: MediaBrowserServiceCompat() {
 
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
+    private val playerCommandReceiver = GetPlayerCommandReceiver()
 
     private val exoPlayer: ExoPlayer by lazy {
         val audioAttributes = AudioAttributes.Builder()
@@ -87,6 +93,7 @@ class MusicService: MediaBrowserServiceCompat() {
             it.setPlaybackPreparer(AMPlaybackPreparer(musicSource, exoPlayer, dataSourceFactory))
             it.setPlayer(exoPlayer)
             it.setQueueNavigator(AMQueueNavigator(mediaSession))
+            it.registerCustomCommandReceiver(playerCommandReceiver)
         }
 
         playerNotificationManager = PlayerNotificationManager.createWithNotificationChannel(
@@ -115,6 +122,7 @@ class MusicService: MediaBrowserServiceCompat() {
             release()
         }
         playerNotificationManager.setPlayer(null);
+        mediaSessionConnector.unregisterCustomCommandReceiver(playerCommandReceiver)
         exoPlayer.release()
 
         serviceJob.cancel()
@@ -195,6 +203,29 @@ class MusicService: MediaBrowserServiceCompat() {
         override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
             stopSelf()
         }
+    }
+
+    private inner class GetPlayerCommandReceiver: MediaSessionConnector.CommandReceiver {
+        override fun onCommand(
+            player: Player,
+            controlDispatcher: ControlDispatcher,
+            command: String,
+            extras: Bundle,
+            cb: ResultReceiver
+        ): Boolean {
+            if (command != GET_PLAYER_COMMAND) {
+                return false
+            }
+
+            val bundle = Bundle()
+            bundle.putBinder(MUSIC_SERVICE_BINDER_KEY, MusicServiceBinder())
+            cb.send(0, bundle)
+            return true
+        }
+    }
+
+    inner class MusicServiceBinder : Binder() {
+        fun getExoPlayer() = exoPlayer
     }
 }
 

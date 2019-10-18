@@ -22,10 +22,19 @@ class AMPlaybackPreparer(
     private val dataSourceFactory: DataSource.Factory
 ) : MediaSessionConnector.PlaybackPreparer {
     override fun getSupportedPrepareActions(): Long =
-        PlaybackStateCompat.ACTION_PREPARE_FROM_MEDIA_ID or
+        PlaybackStateCompat.ACTION_PREPARE or
+                PlaybackStateCompat.ACTION_PLAY or
+                PlaybackStateCompat.ACTION_PREPARE_FROM_MEDIA_ID or
                 PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID
 
-    override fun onPrepare(playWhenReady: Boolean) = Unit
+    override fun onPrepare(playWhenReady: Boolean) {
+        Log.i(TAG, "onPrepare")
+
+        musicSource.whenReady {
+            val first = musicSource.toList().getOrNull(0)
+            onPrepareFromMediaId(first?.id, playWhenReady, null)
+        }
+    }
 
     override fun onPrepareFromMediaId(mediaId: String?, playWhenReady: Boolean, extras: Bundle?) {
         Log.i(TAG, "onPrepareFromMediaId: mediaID=$mediaId")
