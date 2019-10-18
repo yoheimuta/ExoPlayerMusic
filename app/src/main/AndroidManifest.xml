@@ -29,6 +29,9 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".NowPlayingActivity">
+        </activity>
+
         <service
             android:name=".playback.MusicService"
             android:enabled="true"
