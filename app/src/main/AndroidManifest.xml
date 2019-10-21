@@ -29,7 +29,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".NowPlayingActivity">
+        <activity
+            android:name=".NowPlayingActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        >
         </activity>
 
         <service

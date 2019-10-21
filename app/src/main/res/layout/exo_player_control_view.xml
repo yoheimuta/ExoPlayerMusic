@@ -45,7 +45,7 @@
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="20dp"
+        android:padding="10dp"
         android:gravity="center"
         android:text="Song Title"
         android:textColor="@android:color/black"
