@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="top"
+    android:layoutDirection="ltr"
+    android:orientation="vertical"
+    tools:targetApi="28">
+    <com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+        android:id="@+id/exo_content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
+
+        <ImageView
+            android:id="@id/exo_artwork"
+            android:padding="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white"
+            android:scaleType="fitXY" />
+
+        <ProgressBar android:id="@id/exo_buffering"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:layout_gravity="center"/>
+
+        <TextView android:id="@id/exo_error_message"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:background="@color/exo_error_message_background_color"
+            android:padding="16dp"/>
+    </com.google.android.exoplayer2.ui.AspectRatioFrameLayout>
+
+    <View android:id="@id/exo_controller_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

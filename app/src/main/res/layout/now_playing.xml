@@ -11,7 +11,11 @@
             android:id="@+id/player_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:played_color="#696969"
+            app:unplayed_color="#F2F2F2"
+            app:buffered_color="#D6D6D6"
             app:show_buffering="when_playing"
+            app:repeat_toggle_modes="one|all"
             app:show_shuffle_button="true"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
