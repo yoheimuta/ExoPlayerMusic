@@ -13,7 +13,6 @@ import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.graphics.Bitmap
 import android.os.Binder
 import android.os.ResultReceiver
@@ -171,7 +170,7 @@ class MusicService: MediaBrowserServiceCompat() {
         }
 
         override fun getCurrentContentText(player: Player): String? {
-            return mediaController.metadata.description.subtitle.toString()
+            return ""
         }
 
         override fun getCurrentLargeIcon(
