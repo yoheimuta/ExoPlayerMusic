@@ -13,7 +13,6 @@ import com.github.yoheimuta.amplayer.databinding.NowPlayingBinding
 import com.github.yoheimuta.amplayer.playback.GET_PLAYER_COMMAND
 import com.github.yoheimuta.amplayer.playback.MUSIC_SERVICE_BINDER_KEY
 import com.github.yoheimuta.amplayer.playback.MusicService
-import com.google.android.exoplayer2.ui.PlayerView
 
 const val NOW_PLAYING_INTENT_MEDIA_ID = "mediaId"
 private const val TAG = "NowPlayingActivity"
@@ -87,15 +86,18 @@ class NowPlayingActivity: AppCompatActivity() {
         override fun onReceiveResult(resultCode: Int, resultData: Bundle) {
             val service = resultData.getBinder(MUSIC_SERVICE_BINDER_KEY)
             if (service is MusicService.MusicServiceBinder) {
-                binding.playerView.player = service.getExoPlayer()
-
-                val mediaController = MediaControllerCompat.getMediaController(this@NowPlayingActivity)
-                val controls = mediaController.getTransportControls()
-                if (mediaId != null) {
-                    controls.prepareFromMediaId(mediaId, null)
-                } else {
-                    controls.prepare()
+                if (binding.playerView.player != null) {
+                    return
                 }
+                val player = service.getExoPlayer()
+                binding.playerView.player = player
+
+                if (player.isPlaying) {
+                    return
+                }
+                val mediaController =
+                    MediaControllerCompat.getMediaController(this@NowPlayingActivity)
+                mediaController.getTransportControls().prepareFromMediaId(mediaId, null)
             }
         }
     }

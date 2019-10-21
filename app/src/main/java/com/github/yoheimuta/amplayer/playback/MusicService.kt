@@ -45,6 +45,7 @@ class MusicService: MediaBrowserServiceCompat() {
     private lateinit var mediaSessionConnector: MediaSessionConnector
     private lateinit var playerNotificationManager: PlayerNotificationManager
     private lateinit var musicSource: MusicSource
+    private lateinit var becomingNoisyReceiver: BecomingNoisyReceiver
 
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
@@ -82,8 +83,11 @@ class MusicService: MediaBrowserServiceCompat() {
             setSessionToken(sessionToken)
         }
 
+        becomingNoisyReceiver =
+            BecomingNoisyReceiver(context = this, sessionToken = mediaSession.sessionToken)
+
         mediaController = MediaControllerCompat(this, mediaSession).also {
-            it.registerCallback(MediaControllerCallback(this, mediaSession.sessionToken))
+            it.registerCallback(MediaControllerCallback(becomingNoisyReceiver))
         }
 
         mediaSessionConnector = MediaSessionConnector(mediaSession).also {
@@ -122,6 +126,7 @@ class MusicService: MediaBrowserServiceCompat() {
             isActive = false
             release()
         }
+        becomingNoisyReceiver.unregister()
         playerNotificationManager.setPlayer(null);
         mediaSessionConnector.unregisterCustomCommandReceiver(playerCommandReceiver)
         exoPlayer.release()
@@ -234,15 +239,13 @@ class MusicService: MediaBrowserServiceCompat() {
     }
 }
 
-private class MediaControllerCallback(private val context: Context,
-                                      private val token: MediaSessionCompat.Token) : MediaControllerCompat.Callback() {
-    private val becomingNoisyReceiver = BecomingNoisyReceiver(context, token)
-
+private class MediaControllerCallback(private val becomingNoisyReceiver: BecomingNoisyReceiver)
+    : MediaControllerCompat.Callback() {
     override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-        state?.let { updateNotification(it) }
+        state?.let { updateNoisyReceiver(it) }
     }
 
-    private fun updateNotification(state: PlaybackStateCompat) {
+    private fun updateNoisyReceiver(state: PlaybackStateCompat) {
         val updatedState = state.state
 
         if (updatedState == PlaybackStateCompat.STATE_NONE) {
