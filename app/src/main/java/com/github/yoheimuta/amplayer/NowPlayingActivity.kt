@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.github.yoheimuta.amplayer.databinding.NowPlayingBinding
+import com.github.yoheimuta.amplayer.extensions.id
 import com.github.yoheimuta.amplayer.playback.GET_PLAYER_COMMAND
 import com.github.yoheimuta.amplayer.playback.MUSIC_SERVICE_BINDER_KEY
 import com.github.yoheimuta.amplayer.playback.MusicService
@@ -92,11 +93,11 @@ class NowPlayingActivity: AppCompatActivity() {
                 val player = service.getExoPlayer()
                 binding.playerView.player = player
 
-                if (player.isPlaying) {
-                    return
-                }
                 val mediaController =
                     MediaControllerCompat.getMediaController(this@NowPlayingActivity)
+                if (mediaController.metadata.id == mediaId) {
+                    return
+                }
                 mediaController.getTransportControls().prepareFromMediaId(mediaId, null)
             }
         }
