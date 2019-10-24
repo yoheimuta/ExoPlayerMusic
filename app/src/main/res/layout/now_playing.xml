@@ -15,6 +15,7 @@
             app:unplayed_color="#F2F2F2"
             app:buffered_color="#D6D6D6"
             app:show_buffering="when_playing"
+            app:hide_on_touch="false"
             app:repeat_toggle_modes="one|all"
             app:show_shuffle_button="true"/>
 

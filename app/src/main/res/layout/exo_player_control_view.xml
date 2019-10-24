@@ -42,7 +42,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/song_title"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="10dp"
@@ -57,31 +57,48 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingTop="4dp"
-        android:background="#CC000000"
         android:orientation="horizontal">
 
         <ImageButton android:id="@id/exo_shuffle"
+            android:tint="@android:color/black"
             style="@style/ExoMediaButton"/>
 
         <ImageButton android:id="@id/exo_prev"
-            style="@style/ExoMediaButton.Previous"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?android:selectableItemBackground"
+            android:padding="10dp"
+            android:src="@drawable/icn_skip_back"/>
 
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
             <ImageButton android:id="@id/exo_play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                style="@style/ExoMediaButton.Play"/>
+                android:background="?android:selectableItemBackground"
+                android:padding="10dp"
+                android:src="@drawable/play_btn"/>
 
             <ImageButton android:id="@id/exo_pause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                style="@style/ExoMediaButton.Pause"/>
+                android:background="?android:selectableItemBackground"
+                android:padding="10dp"
+                android:src="@drawable/stop_btn"/>
         </FrameLayout>
 
         <ImageButton android:id="@id/exo_next"
-            style="@style/ExoMediaButton.Next"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?android:selectableItemBackground"
+            android:padding="10dp"
+            android:src="@drawable/icn_skip_next"/>
 
         <ImageButton android:id="@id/exo_repeat_toggle"
+            android:tint="@android:color/black"
             style="@style/ExoMediaButton"/>
 
 

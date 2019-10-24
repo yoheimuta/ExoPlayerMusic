@@ -10,6 +10,9 @@ import com.google.android.exoplayer2.upstream.DataSource
 inline val MediaMetadataCompat.id: String?
     get() = getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
 
+inline val MediaMetadataCompat.title: String?
+    get() = getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+
 inline val MediaMetadataCompat.mediaUri: Uri
     get() = this.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI).toUri()
 

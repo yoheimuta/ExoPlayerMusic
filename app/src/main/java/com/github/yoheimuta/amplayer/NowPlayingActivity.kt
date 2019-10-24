@@ -5,12 +5,16 @@ import android.media.AudioManager
 import android.os.Bundle
 import android.os.Handler
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
+import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.github.yoheimuta.amplayer.databinding.NowPlayingBinding
 import com.github.yoheimuta.amplayer.extensions.id
+import com.github.yoheimuta.amplayer.extensions.title
 import com.github.yoheimuta.amplayer.playback.GET_PLAYER_COMMAND
 import com.github.yoheimuta.amplayer.playback.MUSIC_SERVICE_BINDER_KEY
 import com.github.yoheimuta.amplayer.playback.MusicService
@@ -66,7 +70,9 @@ class NowPlayingActivity: AppCompatActivity() {
                 val mediaController = MediaControllerCompat(
                     this@NowPlayingActivity, // Context
                     token
-                )
+                ).apply {
+                    registerCallback(MediaControllerCallback())
+                }
 
                 MediaControllerCompat.setMediaController(this@NowPlayingActivity, mediaController)
             }
@@ -100,6 +106,19 @@ class NowPlayingActivity: AppCompatActivity() {
                 }
                 mediaController.getTransportControls().prepareFromMediaId(mediaId, null)
             }
+        }
+    }
+
+    private inner class MediaControllerCallback: MediaControllerCompat.Callback() {
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+            if (metadata == null) {
+                return
+            }
+
+            binding.playerView.
+                findViewById<View>(R.id.exo_controller).
+                findViewById<TextView>(R.id.song_title).
+                setText(metadata.title)
         }
     }
 }
