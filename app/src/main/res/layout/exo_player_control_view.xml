@@ -47,7 +47,6 @@
         android:layout_height="match_parent"
         android:padding="10dp"
         android:gravity="center"
-        android:text="Song Title"
         android:textColor="@android:color/black"
         android:textStyle="bold"
         android:textSize="22sp" />
@@ -104,5 +103,38 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingTop="4dp"
+        android:orientation="horizontal">
 
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:background="?android:selectableItemBackground"
+            android:padding="10dp"
+            android:src="@drawable/icn_volume_min"/>
+
+        <SeekBar
+            android:id="@+id/volume_control"
+            android:layout_weight="8"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:progressBackgroundTint="#555555"
+            android:progressTint="@android:color/black"
+            android:thumb="@drawable/volume_pointer"
+            />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:background="?android:selectableItemBackground"
+            android:padding="10dp"
+            android:src="@drawable/icn_volume_on"/>
+
+    </LinearLayout>
 </LinearLayout>
