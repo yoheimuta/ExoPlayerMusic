@@ -120,7 +120,10 @@ class NowPlayingActivity: AppCompatActivity() {
     public override fun onStop() {
         super.onStop()
         mediaBrowser.disconnect()
+    }
 
+    public override fun onDestroy() {
+        super.onDestroy()
         if (binding.playerView.player != null) {
             binding.playerView.player.removeListener(playerEventListener)
         }
