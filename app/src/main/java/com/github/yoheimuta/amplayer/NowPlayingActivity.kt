@@ -22,6 +22,13 @@ import com.github.yoheimuta.amplayer.playback.GET_PLAYER_COMMAND
 import com.github.yoheimuta.amplayer.playback.MUSIC_SERVICE_BINDER_KEY
 import com.github.yoheimuta.amplayer.playback.MusicService
 import android.view.KeyEvent
+import com.google.android.exoplayer2.metadata.Metadata;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.metadata.id3.BinaryFrame
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray
+import com.google.android.exoplayer2.source.TrackGroupArray
+import com.google.android.exoplayer2.util.ParsableByteArray
+import java.nio.charset.Charset
 
 const val NOW_PLAYING_INTENT_MEDIA_ID = "mediaId"
 private const val TAG = "NowPlayingActivity"
@@ -34,9 +41,21 @@ class NowPlayingActivity: AppCompatActivity() {
     private lateinit var audioManager: AudioManager
     private lateinit var uiHandler: Handler
 
+    private val playerEventListener = PlayerEventListener()
+
+    private val lyricsView: TextView by lazy {
+        binding.playerView.
+            findViewById<TextView>(R.id.lyrics_view)
+    }
+
     private val playerControlView: View by lazy {
         binding.playerView.
             findViewById<View>(R.id.exo_controller)
+    }
+
+    private val songTitleView: TextView by lazy {
+        playerControlView.
+            findViewById<TextView>(R.id.song_title)
     }
 
     private val volumeControlView: SeekBar by lazy {
@@ -102,6 +121,10 @@ class NowPlayingActivity: AppCompatActivity() {
     public override fun onStop() {
         super.onStop()
         mediaBrowser.disconnect()
+
+        if (binding.playerView.player != null) {
+            binding.playerView.player.removeListener(playerEventListener)
+        }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
@@ -158,13 +181,11 @@ class NowPlayingActivity: AppCompatActivity() {
                     return
                 }
                 val player = service.getExoPlayer()
+                player.addListener(playerEventListener)
                 binding.playerView.player = player
 
                 val mediaController =
                     MediaControllerCompat.getMediaController(this@NowPlayingActivity)
-                if (mediaController.metadata.id == mediaId) {
-                    return
-                }
                 mediaController.getTransportControls().prepareFromMediaId(mediaId, null)
             }
         }
@@ -176,9 +197,114 @@ class NowPlayingActivity: AppCompatActivity() {
                 return
             }
 
-            playerControlView.
-                findViewById<TextView>(R.id.song_title).
+            songTitleView.
                 setText(metadata.title)
         }
     }
+
+    private inner class PlayerEventListener: Player.EventListener {
+        override fun onTracksChanged(
+            trackGroups: TrackGroupArray,
+            trackSelections: TrackSelectionArray?
+        ) {
+            lyricsView.setText("")
+            for (i in 0 until trackGroups.length) {
+                val trackGroup = trackGroups.get(i)
+                for (j in 0 until trackGroup.length) {
+                    val trackMetadata = trackGroup.getFormat(j).metadata ?: continue
+                    val lyrics = extractLyrics(trackMetadata) ?: continue
+                    lyricsView.setText(lyrics)
+                }
+            }
+        }
+    }
+}
+
+private fun extractLyrics(metadata: Metadata): String? {
+    for (i in 0 until metadata.length()) {
+        val metadataEntry = metadata.get(i);
+        if (metadataEntry is BinaryFrame && metadataEntry.id == "USLT") {
+            val ba = metadataEntry.data
+            return decodeLyrics(ParsableByteArray(ba), ba.size)
+        }
+    }
+    return null
+}
+
+private val ID3_TEXT_ENCODING_ISO_8859_1 = 0
+private val ID3_TEXT_ENCODING_UTF_16 = 1
+private val ID3_TEXT_ENCODING_UTF_16BE = 2
+private val ID3_TEXT_ENCODING_UTF_8 = 3
+
+// See http://id3.org/id3v2.4.0-frames
+private fun decodeLyrics(id3Data: ParsableByteArray, frameSize: Int): String? {
+    if (frameSize < 4) {
+      // Frame is malformed.
+      return null;
+    }
+
+    val encoding = id3Data.readUnsignedByte()
+    val charset = getCharsetName(encoding)
+
+    val lang = ByteArray(3)
+    id3Data.readBytes(lang, 0, 3); // language
+    val rest = ByteArray(frameSize - 4)
+    id3Data.readBytes(rest, 0, frameSize - 4);
+
+    val descriptionEndIndex = indexOfEos(rest, 0, encoding);
+    val textStartIndex = descriptionEndIndex + delimiterLength(encoding);
+    val textEndIndex = indexOfEos(rest, textStartIndex, encoding);
+    return decodeStringIfValid(rest, textStartIndex, textEndIndex, charset)
+}
+
+private fun getCharsetName(encodingByte: Int): Charset {
+    val name = when (encodingByte) {
+        ID3_TEXT_ENCODING_UTF_16 -> "UTF-16"
+        ID3_TEXT_ENCODING_UTF_16BE -> "UTF-16BE"
+        ID3_TEXT_ENCODING_UTF_8 -> "UTF-8"
+        ID3_TEXT_ENCODING_ISO_8859_1 -> "ISO-8859-1"
+        else -> "ISO-8859-1"
+    }
+    return Charset.forName(name)
+}
+
+private fun indexOfEos(data: ByteArray, fromIndex: Int, encoding: Int): Int {
+    var terminationPos = indexOfZeroByte(data, fromIndex)
+
+    // For single byte encoding charsets, we're done.
+    if (encoding == ID3_TEXT_ENCODING_ISO_8859_1 || encoding == ID3_TEXT_ENCODING_UTF_8) {
+        return terminationPos
+    }
+
+    // Otherwise ensure an even index and look for a second zero byte.
+    while (terminationPos < data.size - 1) {
+        if (terminationPos % 2 == 0 && data[terminationPos + 1] == 0.toByte()) {
+            return terminationPos
+        }
+        terminationPos = indexOfZeroByte(data, terminationPos + 1)
+    }
+
+    return data.size
+}
+
+private fun indexOfZeroByte(data: ByteArray, fromIndex: Int): Int {
+    for (i in fromIndex until data.size) {
+        if (data[i] == 0.toByte()) {
+            return i
+        }
+    }
+    return data.size
+}
+
+private fun delimiterLength(encodingByte: Int): Int {
+    return if (encodingByte == ID3_TEXT_ENCODING_ISO_8859_1 || encodingByte == ID3_TEXT_ENCODING_UTF_8)
+        1
+    else
+        2
+}
+
+private fun decodeStringIfValid(data: ByteArray, from: Int, to: Int, charset: Charset): String {
+    return if (to <= from || to > data.size) {
+        ""
+    } else String(data, from, to - from, charset)
 }

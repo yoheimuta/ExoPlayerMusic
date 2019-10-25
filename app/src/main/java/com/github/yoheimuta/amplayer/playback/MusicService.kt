@@ -50,7 +50,7 @@ class MusicService: MediaBrowserServiceCompat() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
     private val playerCommandReceiver = GetPlayerCommandReceiver()
 
-    private val exoPlayer: ExoPlayer by lazy {
+    private val exoPlayer: SimpleExoPlayer by lazy {
         val audioAttributes = AudioAttributes.Builder()
             .setContentType(C.CONTENT_TYPE_MUSIC)
             .setUsage(C.USAGE_MEDIA)
